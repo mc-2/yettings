@@ -1,0 +1,17 @@
+defaults: &defaults
+  yetting1: what
+  yetting2: 999
+  yetting3: <%= "this is erb " %>
+  yetting4:
+    - element1
+    - element2
+
+development:
+  <<: *defaults
+  yetting1: override for dev
+
+test:
+  <<: *defaults
+
+production:
+  <<: *defaults

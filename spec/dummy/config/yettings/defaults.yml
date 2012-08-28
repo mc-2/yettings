@@ -1,0 +1,6 @@
+defaults:
+  yetting1: default value
+  yetting2: default value
+
+test:
+  yetting2: test value
