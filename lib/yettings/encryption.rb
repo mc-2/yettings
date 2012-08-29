@@ -74,7 +74,7 @@ module Yettings
       end
 
       def gen_keys
-        key = OpenSSL::PKey::RSA.new 4092
+        key = OpenSSL::PKey::RSA.new 16368
 
         private_path = "#{root}/.private"
         FileUtils.mkpath private_path
