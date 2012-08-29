@@ -21,7 +21,17 @@ module Yettings
     def create_yetting_class(yml_file)
       name = klass_name(yml_file)
       klass = Object.const_set(name, Class.new(Yettings::Base))
-      klass.load_yml_erb File.read(yml_file)
+      klass.load_yml_erb yaml_erb(yml_file)
+    end
+
+    def yaml_erb(yml_file)
+      yaml_erb = File.read(yml_file)
+      yaml_erb = decrypt_string(yaml_erb) if pub?(yml_file)
+      yaml_erb
+    end
+
+    def pub?(yml_file)
+      yml_file.end_with? ".pub"
     end
 
     def klass_name(yml_file)
@@ -53,7 +63,7 @@ module Yettings
     end
 
     def find_yml_files
-      Dir.glob("#{rails_config}/yetting.yml") + Dir.glob("#{root}/**/*.yml")
+      Dir.glob("#{rails_config}/yetting.yml") + Dir.glob("#{root}/**/*.yml") + Dir.glob("#{root}/**/*.yml.pub")
     end
 
     def find_public_yml_files

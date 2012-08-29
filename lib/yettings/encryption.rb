@@ -3,38 +3,6 @@ module Yettings
     extend ActiveSupport::Concern
 
     module ClassMethods
-      def decrypt_yml(yml)
-        hash = yml.present? ? YAML.load(yml).to_hash : {}
-        decrypt_hash(hash).to_yaml
-      end
-
-      def encrypt_yml(yml)
-        hash = yml.present? ? YAML.load(yml).to_hash : {}
-        encrypt_hash(hash).to_yaml
-      end
-
-      def decrypt_hash(public_hash)
-        public_hash.inject({}) do |private_hash, key_val|
-          key, val = key_val
-          private_hash.update key => decrypt(val) # recursive!
-        end
-      end
-
-      def encrypt_hash(private_hash)
-        private_hash.inject({}) do |public_hash, key_val|
-          key, val = key_val
-          public_hash.update key => encrypt(val) # recursive!
-        end
-      end
-
-      def decrypt(obj)
-        obj.is_a?(Hash) ? decrypt_hash(obj) : decrypt_string(obj.to_s)
-      end
-
-      def encrypt(obj)
-        obj.is_a?(Hash) ? encrypt_hash(obj) : encrypt_string(obj.to_s)
-      end
-
       def decrypt_string(public_string)
         if private_key.present?
           private_key.private_decrypt(public_string).to_s.force_encoding("UTF-8")
@@ -44,13 +12,13 @@ module Yettings
       end
 
       def encrypt_string(private_string)
-        public_key.public_encrypt(private_string).to_s
+        public_key.public_encrypt(private_string).to_s.force_encoding("UTF-8")
       end
 
       def encrypt_file(private_file)
-        public_file = public_path(private_file)
-        public_yml = encrypt_yml File.read(private_file)
         return if private_key.nil? # Don't overwrite encrypted file without key
+        public_file = public_path(private_file)
+        public_yml = encrypt_string File.read(private_file)
         return unless check_overwrite(public_file, private_file, public_yml)
         File.open(public_file, 'w') { |f| f.write public_yml }
       end
@@ -63,7 +31,7 @@ module Yettings
 
       def decrypt_file(public_file)
         private_file = private_path(public_file)
-        private_yml = decrypt_yml File.read(public_file)
+        private_yml = decrypt_string File.read(public_file)
         return unless check_overwrite(private_file, public_file, private_yml)
         File.open(private_file, 'w') { |f| f.write private_yml }
       end

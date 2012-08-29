@@ -3,51 +3,52 @@ require 'spec_helper'
 describe Yettings::Encryption do
   YETTINGS_DIR = "#{Rails.root}/config/yettings"
   YETTING_FILE = "#{Rails.root}/config/yetting.yml"
+  SECRET_YETTING_FILE = "#{Rails.root}/config/yettings/.private/secret2.yml"
+  SECRET_YETTING_PUB_FILE = "#{Rails.root}/config/yettings/secret2.yml.pub"
   BLANK_YETTING_FILE = "#{Rails.root}/config/yettings/blank.yml"
 
   let(:default_yml){ File.read "#{YETTINGS_DIR}/defaults.yml" }
   let(:blank_yml){ "" }
 
-  subject { Yettings }
-
-  describe ".decrypt_yml" do
-    it "decrypts yml" do
-      subject.decrypt_yml(default_yml)
-    end
-  end
-
-  describe ".encrypt_yml" do
-    it "encrypts yaml" do
-      p subject.encrypt(default_yml)
-    end
-  end
-
-  describe ".decrypt_hash" do
-    pending
-  end
-
-  describe ".encrypt_hash" do
-    pending
-  end
-
-  describe ".decrypt" do
-    pending
-  end
-
-  describe ".encrypt" do
-    pending
-  end
-
   describe ".decrypt_string" do
-    pending
+    it "decrypts the string in binary" do
+      str = "This is a private string"
+      encrypted = Yettings.encrypt_string(str)
+      Yettings.decrypt_string(encrypted).should eq str
+    end
   end
 
   describe ".encrypt_string" do
-    pending
+    it "encrypts the string in binary" do
+      str = "This is a private string"
+      Yettings.encrypt_string(str).should_not eq str
+    end
   end
 
   describe ".encrypt_file" do
-    pending
+    before(:each) do
+      File.delete(SECRET_YETTING_PUB_FILE) if File.exists?(SECRET_YETTING_PUB_FILE)
+    end
+
+    after(:each) do
+      File.delete(SECRET_YETTING_PUB_FILE) if File.exists?(SECRET_YETTING_PUB_FILE)
+    end
+
+    it "returns nil if the private key is nil" do
+      Yettings.stub(:private_key => nil)
+      Yettings.encrypt_file(YETTING_FILE).should eq nil
+    end
+
+    it "returns nil check_overwrite is false" do
+      Yettings.stub(:check_overwrite => false)
+      Yettings.encrypt_file(YETTING_FILE).should eq nil
+    end
+
+    it "writes to file if private key is available and check_overwrite passes" do
+      Yettings.stub(:check_overwrite => true)
+      Yettings.encrypt_file(SECRET_YETTING_FILE)
+      File.exists?(SECRET_YETTING_PUB_FILE)
+    end
   end
 
   describe ".decrypt_file" do

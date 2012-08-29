@@ -6,12 +6,12 @@ namespace :yettings do
 
   desc "encrypt sensitive yetting files for checking into revision control"
   task :encrypt => :environment do
-    Yettings.encrypt_files
+    Yettings.encrypt_files!
   end
 
   desc "decrypt sensitive yetting files for editing"
   task :decrypt => :environment do
-    Yettings.decrypt_files
+    Yettings.decrypt_files!
   end
 end
 

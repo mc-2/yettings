@@ -69,7 +69,8 @@ describe Yettings do
                                          "#{YETTINGS_DIR}/blank.yml",
                                          "#{YETTINGS_DIR}/defaults.yml",
                                          "#{YETTINGS_DIR}/hendrix.yml",
-                                         "#{YETTINGS_DIR}/jimi.yml"]
+                                         "#{YETTINGS_DIR}/jimi.yml",
+                                         "#{YETTINGS_DIR}/secret.yml.pub"]
     end
 
     it "finds 3 yettings dir files if there is no main file" do
@@ -79,7 +80,8 @@ describe Yettings do
         yml_files.should eq ["#{YETTINGS_DIR}/blank.yml",
                              "#{YETTINGS_DIR}/defaults.yml",
                              "#{YETTINGS_DIR}/hendrix.yml",
-                             "#{YETTINGS_DIR}/jimi.yml"]
+                             "#{YETTINGS_DIR}/jimi.yml",
+                             "#{YETTINGS_DIR}/secret.yml.pub"]
       ensure
         FileUtils.mv("#{YETTING_FILE}_tmp","#{YETTING_FILE}")
       end
