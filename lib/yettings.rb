@@ -13,6 +13,7 @@ module Yettings
 
   class << self
     def setup!
+      EncryptedStrings::SymmetricCipher.default_algorithm = 'DES-EDE3-CBC'
       find_yml_files.each do |yml_file|
         create_yetting_class yml_file
       end
