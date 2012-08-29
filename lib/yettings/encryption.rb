@@ -4,19 +4,19 @@ module Yettings
 
     module ClassMethods
       def decrypt_string(public_string)
-        if private_key.present?
-          private_key.private_decrypt(public_string).to_s.force_encoding("UTF-8")
+        if private_key_exists?
+          public_string.decrypt(:asymmetric, :public_key_file => key_path(:public), :private_key_file => key_path(:private))
         else
           "access denied (no private key found)"
         end
       end
 
       def encrypt_string(private_string)
-        public_key.public_encrypt(private_string).to_s.force_encoding("UTF-8")
+        private_string.encrypt(:asymmetric, :public_key_file => key_path(:public), :private_key_file => key_path(:private))
       end
 
       def encrypt_file(private_file)
-        return if private_key.nil? # Don't overwrite encrypted file without key
+        return unless private_key_exists? # Don't overwrite encrypted file without key
         public_file = public_path(private_file)
         public_yml = encrypt_string File.read(private_file)
         return unless check_overwrite(public_file, private_file, public_yml)
@@ -65,22 +65,8 @@ module Yettings
         end
       end
 
-      def public_key
-        @public_key ||= load_key :public
-      end
-
-      def private_key
-        @private_key ||= load_key :private
-      end
-
-      def load_key(type)
-        key_file = key_path(type)
-        if File.exists?(key_file)
-          key = OpenSSL::PKey::RSA.new File.read(key_file)
-          message = "Key #{key_file} is not a #{type} key"
-          raise RuntimeError, message unless key.send "#{type}?"
-          key
-        end
+      def private_key_exists?
+        File.exists? key_path(:private)
       end
 
       def key_path(type)

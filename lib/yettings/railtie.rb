@@ -1,4 +1,5 @@
 require 'rails'
+require 'encrypted_strings'
 require 'yettings'
 
 module Yettings
