@@ -5,18 +5,20 @@ module Yettings
     module ClassMethods
       def decrypt_string(public_string)
         if private_key_exists?
-          public_string.decrypt(:asymmetric, :public_key_file => key_path(:public), :private_key_file => key_path(:private))
+          public_string.decrypt(:asymmetric)
         else
           "access denied (no private key found)"
         end
       end
 
       def encrypt_string(private_string)
-        private_string.encrypt(:asymmetric, :public_key_file => key_path(:public), :private_key_file => key_path(:private))
+        private_string.encrypt(:asymmetric)
       end
 
       def encrypt_file(private_file)
-        return unless private_key_exists? # Don't overwrite encrypted file without key
+        # Don't overwrite encrypted file without key
+        return unless private_key_exists?
+
         public_file = public_path(private_file)
         public_yml = encrypt_string File.read(private_file)
         return unless check_overwrite(public_file, private_file, public_yml)
@@ -52,13 +54,13 @@ module Yettings
 
       def check_overwrite(dest, source, content)
         unless File.exists?(dest)
-          STDERR.puts "WARNING: creating #{dest} with contents of #{source}"
+          warn "WARNING: creating #{dest} with contents of #{source}"
           FileUtils.mkpath File.dirname(dest)
           return true
         end
         return false if File.read(dest) == content
         if File.mtime(source) > File.mtime(dest)
-          STDERR.puts "WARNING: overwriting #{dest} with contents of #{source}"
+          warn "WARNING: overwriting #{dest} with contents of #{source}"
           true
         else
           false

@@ -14,6 +14,10 @@ module Yettings
   class << self
     def setup!
       EncryptedStrings::SymmetricCipher.default_algorithm = 'DES-EDE3-CBC'
+      EncryptedStrings::AsymmetricCipher.tap do |cipher|
+        cipher.default_private_key_file = key_path(:private)
+        cipher.default_public_key_file = key_path(:public)
+      end
       find_yml_files.each do |yml_file|
         create_yetting_class yml_file
       end
