@@ -2,17 +2,27 @@ module Yettings
   module Encryption
     extend ActiveSupport::Concern
 
+    KEY_SIZE = 3072
+    DELIMITER = "========"
+
+    # Set the maximum amount of data the RSA key can encrypt
+    MAX_BYTES = KEY_SIZE / 8 - 11
+
     module ClassMethods
       def decrypt_string(public_string)
         if private_key_exists?
-          public_string.decrypt(:asymmetric)
+          public_string.split(DELIMITER).map { |s| s.decrypt(:asymmetric) }.join
         else
           "access denied (no private key found)"
         end
       end
 
       def encrypt_string(private_string)
-        private_string.encrypt(:asymmetric)
+        (0..private_string.length/MAX_BYTES).map do |i|
+          first = i * MAX_BYTES
+          last = (i + 1) * MAX_BYTES - 1
+          private_string[first..last].encrypt(:asymmetric)
+        end.join(DELIMITER)
       end
 
       def encrypt_file(private_file)
@@ -76,7 +86,7 @@ module Yettings
       end
 
       def gen_keys
-        key = OpenSSL::PKey::RSA.new 16368
+        key = OpenSSL::PKey::RSA.new KEY_SIZE
 
         private_path = "#{root}/.private"
         FileUtils.mkpath private_path
